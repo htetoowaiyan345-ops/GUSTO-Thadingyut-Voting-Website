@@ -1,7 +1,13 @@
-venv/
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Env files
 .env
-firebase-service-account.json
-*.csv
-*.pem
