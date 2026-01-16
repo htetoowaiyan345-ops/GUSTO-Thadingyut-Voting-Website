@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GUSTO Thadingyut Voting</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" type="image/png" href="img/favicon.png" />
+
+  <style>
+    /* Professional Smooth Navigation Indicator */
+    #nav-indicator{
+      position:absolute; border-radius:.75rem; background:#015486;
+      box-shadow:0 4px 12px rgba(1, 84, 134, 0.3);
+      transition:all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity:0; pointer-events:none;
+      transform-origin: center;
+    }
+    /* Keep links above the pill */
+    .nav-a{ position:relative; z-index:10; }
+
+    /* ✅ Desktop-only: active link becomes white */
+    @media (min-width:768px){
+      .nav-a.is-active, .nav-a.is-active * { color:#fff !important; }
+    }
+    /* ✅ Mobile: keep active link dark on white background */
+    @media (max-width:767px){
+      .nav-a.is-active, .nav-a.is-active * { color:#111827 !important; } /* Tailwind gray-900 */
+    }
+    @keyframes diya-glow {
+      0%   { filter: brightness(1) drop-shadow(0 0 0px #FFD700); }
+      40%  { filter: brightness(1.3) drop-shadow(0 0 16px #FFD700); }
+      60%  { filter: brightness(1.1) drop-shadow(0 0 8px #FFD700); }
+      100% { filter: brightness(1) drop-shadow(0 0 0px #FFD700); }
+    }
+    .animate-diya-glow {
+      animation: diya-glow 2s infinite;
+    }
+
+    /* Professional Message Box Styles */
+    .message-box {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 9999;
+      max-width: 400px;
+      width: 90%;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+      backdrop-filter: blur(10px);
+      animation: messageBoxSlideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .message-box.success {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+      border: 2px solid #34D399;
+    }
+
+    .message-box.error {
+      background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
+      border: 2px solid #F87171;
+    }
+
+    .message-box-content {
+      padding: 24px;
+      text-align: center;
+      color: white;
+    }
+
+    .message-box-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      animation: messageBoxBounce 0.6s ease-out;
+    }
+
+    .message-box-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .message-box-message {
+      font-size: 16px;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .message-box-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 9998;
+      animation: messageBoxFadeIn 0.3s ease-out;
+    }
+
+    @keyframes messageBoxSlideIn {
+      0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+    }
+
+    @keyframes messageBoxBounce {
+      0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+      }
+      40% {
+        transform: translateY(-10px);
+      }
+      60% {
+        transform: translateY(-5px);
+      }
+    }
+
+    @keyframes messageBoxFadeIn {
+      0% {
+        opacity: 0;
+      }
+      100% {
+        opacity: 1;
+      }
+    }
+  </style>
+
+  
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="flex items-center justify-between px-6 h-[72px]"> <!-- fixed height -->
+      
+      <!-- Logo -->
+      <div class="flex items-center space-x-2">
+        <a href="{{ url_for('home') }}" class="flex items-center">
+          <img src="img/Gusto_Nav_Logo.png"
+              alt="GUSTO Logo"
+              class="h-[70px] w-auto -my-4 rounded-full" /> <!-- logo bigger, negative margin -->
+        </a>
+            <div class="flex flex-col md:flex-row items-center">
+            <!-- GUSTO -->
+            <span class="font-extrabold lg:text-3xl font-[Merriweather,serif]">
+                GUSTO
+            </span>
+
+            <!-- Myanmar text -->
+            <span
+                class="ml-1 font-normal font-[Noto_Sans_Myanmar] whitespace-nowrap
+                    text-base md:text-xl max-[330px]:text-sm">
+                သီတင်းကျွတ်ပွဲတော်
+            </span>
+            </div>
+
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menu-btn" class="block md:hidden text-2xl p-2" aria-label="Open menu">&#9776;</button>
+
+      <!-- Links -->
+      <div id="nav-links"
+          class="hidden md:flex flex-col md:flex-row items-start md:items-center
+                  space-y-2 md:space-y-0 md:space-x-4 bg-white px-4 py-4 md:p-0
+                  rounded-none md:rounded-full fixed md:static top-[64px] left-0
+                  w-full md:w-auto z-40 shadow md:shadow-none">
+
+        <div class="relative md:flex md:items-center">
+          <!-- Moving pill -->
+          <span id="nav-indicator" aria-hidden="true"
+                class="hidden md:block absolute top-0 left-0 rounded-xl bg-[#015486] shadow-lg"></span>
+
+          <ul class="flex flex-col md:flex-row w-full md:w-auto space-y-2 md:space-y-0 md:space-x-2 font-medium">
+            <li><a href="{{ url_for('home') }}"           class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Home</a></li>
+            <li><a href="{{ url_for('candidates') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Candidate</a></li>
+            <li><a href="{{ url_for('lantern') }}"        class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Lantern</a></li>
+            <li><a href="{{ url_for('mote_phoe') }}"        class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Mote Phoe</a></li>
+            <li><a href="{{ url_for('results') }}"  class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Voting Result</a></li>
+            <li><a href="{{ url_for('about') }}"       class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">About Us</a></li>
+            <li><a href="{{ url_for('final') }}"          class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Final</a></li>
+            <li><a href="{{ url_for('winner') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Winner</a></li>
+            <li><a href="{{ url_for('logout') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+    
+    <!-- Main content -->
+
+    <main class="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-10 mb-16">
+      <h2 class="text-2xl font-semibold text-center">Candidate Info</h2>
+
+      <!-- Back button -->
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 md:px-8 mt-2 mb-4">
+        <a id="backToList"
+           href="{{ url_for('candidates') }}?tab={{ candidate.type }}"
+           class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-800 shadow">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span>Back to {{ 'Queen' if candidate.type == 'queen' else 'King' }} list</span>
+        </a>
+      </div>
+
+      <!-- layout -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-center gap-10 md:gap-14 mt-8">
+
+        <!-- Image + arrows -->
+        <div class="relative w-full md:w-auto">
+          <!-- left arrow -->
+          <button id="prevBtn"
+                  class="absolute left-2 top-1/2 -translate-y-1/2 z-10
+                        w-10 h-10 rounded-full bg-white/85 shadow hover:bg-white">
+            &lt;
+          </button>
+
+          <!-- the image -->
+          <img id="candidateImage" src="" alt="Candidate"
+              class="object-cover rounded-xl border shadow-lg transition-all duration-500
+
+                      w-full h-[22rem]                 /* mobile: full width */
+                      sm:w-[320px] sm:h-[440px]        /* tablet */
+                      md:w-[380px] md:h-[500px]        /* desktop */
+                      lg:w-[420px] lg:h-[560px]"       />    
+
+          <!-- right arrow -->
+          <button id="nextBtn"
+                  class="absolute right-2 top-1/2 -translate-y-1/2 z-10
+                        w-10 h-10 rounded-full bg-white/85 shadow hover:bg-white">
+            &gt;
+          </button>
+        </div>
+
+        <!-- Details card -->
+        <div class="bg-white p-6 rounded-xl shadow border w-full md:w-[360px]">
+          <p class="mb-4"><span class="font-semibold text-xl">Name</span> - <span id="name">{{ candidate.name }}</span></p>
+          <p class="mb-4"><span class="font-semibold text-xl">Batch</span> - <span id="batch">{{ candidate.batch }}</span></p>
+          <p class="mb-6"><span class="font-semibold text-xl">Bio</span> - <span id="bio">{{ candidate.bio }}</span></p>
+
+          <button disabled class="w-full bg-gray-400 text-white py-2.5 rounded-md font-semibold cursor-not-allowed opacity-60">
+            Vote
+          </button>
+        </div>
+
+      </div>
+    </main>
+
+
+     <!-- Footer -->
+   <footer class="bg-[#03254C] py-4 px-4 md:py-5 md:px-8 h-auto md:h-[200px]">
+    <div class="flex flex-col md:flex-row justify-between items-center h-full text-center">
+
+        <div class="text-orange-400 font-medium 
+                    text-base lg:text-xl 
+                    mb-3 md:mb-0 
+                    ml-0 md:ml-[100px] 
+                    pr-0 md:pr-4 order-1">
+        ပျော်ရွှင်စရာသတင်းကျွတ်အချိန်အခါလေးဖြစ်ပါစေ
+        </div>
+
+        <div class="flex justify-center items-center py-2 order-2 flex-grow-0">
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[50px] h-[50px] -mt-3 mx-1 md:w-[70px] md:h-[70px] md:-mt-4 animate-diya-glow" />
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        </div>
+
+        <div class="flex flex-col items-center md:items-end 
+                    text-orange-400 font-medium 
+                    text-base md:text-lg lg:text-xl 
+                    mt-3 md:mt-0 
+                    mr-0 md:mr-[100px] 
+                    pl-0 md:pl-4 order-3">
+        
+        <div class="flex flex-wrap justify-center md:justify-end w-[370px] lg:justify-center space-x-4 md:space-x-6 mb-1 md:mb-0 font-[fa-chevron-left]">
+            <a href="{{ url_for('home') }}" class="hover:text-yellow-400">Home</a>
+            <a href="{{ url_for('candidates') }}" class="hover:text-yellow-400">Candidate</a>
+            <a href="{{ url_for('lantern') }}" class="hover:text-yellow-400">Lantern</a>
+        </div>
+
+        <br>
+
+        <div class="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-6 mt-1 md:mt-1 font-[fa-chevron-left]">
+            <a href="{{ url_for('results') }}" class="hover:text-yellow-400">Voting Result</a>
+            <a href="{{ url_for('about') }}" class="hover:text-yellow-400">About us</a>
+            <a href="{{ url_for('final') }}" class="hover:text-yellow-400">Final</a>
+            <a href="{{ url_for('winner') }}" class="hover:text-yellow-400">Winner</a>
+        </div>
+        </div>
+
+    </div>
+    </footer>
+
+    <!-- Mobile nav toggle -->
+    <script>
+    const menuBtn = document.getElementById('menu-btn');
+    const navLinks = document.getElementById('nav-links');
+    if (menuBtn) menuBtn.addEventListener('click', () => navLinks.classList.toggle('hidden'));
+    </script>
+    
+    <!-- Unified Navigation Script -->
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+
+    <script>
+    // ===== Candidate Data from Server =====
+    const candidate = {{ candidate | tojson }};
+    
+    // Set up image gallery based on candidate type
+    let images = [];
+    if (candidate.type === 'queen') {
+        images = [
+            'img/Queen_Viewmore/' + candidate.name + '(1).jpg',
+            'img/Queen_Viewmore/' + candidate.name + '(2).jpg',
+            'img/Queen_Viewmore/' + candidate.name + '(3).jpg'
+        ];
+    } else {
+        images = [
+            'img/King_Viewmore/' + candidate.name + '(1).jpg',
+            'img/King_Viewmore/' + candidate.name + '(2).jpg',
+            'img/King_Viewmore/' + candidate.name + '(3).jpg'
+        ];
+    }
+
+    // Set initial image
+    const imgEl = document.getElementById('candidateImage');
+    let index = 0;
+    function showImage(){ 
+        if (imgEl && images[index]) {
+            imgEl.src = images[index]; 
+        }
+    }
+    if (imgEl) showImage();
+
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    if (prevBtn) prevBtn.addEventListener('click', ()=>{
+        index = (index - 1 + images.length) % images.length;
+        showImage();
+    });
+    if (nextBtn) nextBtn.addEventListener('click', ()=>{
+        index = (index + 1) % images.length;
+        showImage();
+    });
+
+    // Voting functionality
+    function voteCandidate(candidateId, candidateType) {
+      // Show loading state
+      const button = event.target;
+      const originalText = button.textContent;
+      button.textContent = 'Voting...';
+      button.disabled = true;
+      
+      // Send vote to server
+      fetch('/vote', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `candidate_id=${candidateId}&candidate_type=${candidateType}`
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          // Show success message
+          button.textContent = 'Voted!';
+          button.classList.remove('bg-orange-500', 'hover:bg-orange-600');
+          button.classList.add('bg-green-500', 'hover:bg-green-600');
+          
+          // Show professional success message box
+          showMessageBox('success', 'Vote Recorded Successfully!', 'Thank you for voting! Your vote has been recorded.');
+          
+        } else {
+          // Show error message
+          button.textContent = 'Error';
+          button.classList.add('bg-red-500');
+          
+          // Show professional error message box
+          showMessageBox('error', 'Voting Error', data.message);
+          
+          // Reset button after 3 seconds
+          setTimeout(() => {
+            button.textContent = originalText;
+            button.disabled = false;
+            button.classList.remove('bg-red-500');
+          }, 3000);
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        button.textContent = 'Error';
+        button.classList.add('bg-red-500');
+        
+        // Show professional error message box
+        showMessageBox('error', 'Network Error', 'Please check your connection and try again.');
+        
+        // Reset button after 3 seconds
+        setTimeout(() => {
+          button.textContent = originalText;
+          button.disabled = false;
+          button.classList.remove('bg-red-500');
+        }, 3000);
+      });
+    }
+
+    // Professional Message Box Function
+    function showMessageBox(type, title, message) {
+      // Remove any existing message boxes
+      const existingBox = document.querySelector('.message-box-overlay');
+      if (existingBox) {
+        existingBox.remove();
+      }
+
+      // Create overlay
+      const overlay = document.createElement('div');
+      overlay.className = 'message-box-overlay';
+
+      // Create message box
+      const messageBox = document.createElement('div');
+      messageBox.className = `message-box ${type}`;
+
+      // Set icon based on type
+      const icon = type === 'success' ? '🎉' : '⚠️';
+
+      messageBox.innerHTML = `
+        <div class="message-box-content">
+          <div class="message-box-icon">${icon}</div>
+          <div class="message-box-title">${title}</div>
+          <div class="message-box-message">${message}</div>
+        </div>
+      `;
+
+      // Add to page
+      overlay.appendChild(messageBox);
+      document.body.appendChild(overlay);
+
+      // Auto-close after 4 seconds
+      setTimeout(() => {
+        if (overlay.parentNode) {
+          overlay.style.animation = 'messageBoxFadeIn 0.3s ease-out reverse';
+          setTimeout(() => {
+            overlay.remove();
+          }, 300);
+        }
+      }, 4000);
+
+      // Close on overlay click
+      overlay.addEventListener('click', (e) => {
+        if (e.target === overlay) {
+          overlay.style.animation = 'messageBoxFadeIn 0.3s ease-out reverse';
+          setTimeout(() => {
+            overlay.remove();
+          }, 300);
+        }
+      });
+    }
+    </script>
+
+    <script>
+      document.getElementById('backToList')?.addEventListener('click', (e) => {
+        if (document.referrer && new URL(document.referrer, location.origin).pathname.includes('/candidates')) {
+          e.preventDefault();
+          history.back();
+        }
+      });
+    </script>
+
+
+</body>
+</html>

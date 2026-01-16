@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GUSTO Thadingyut Voting</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+  <link rel="icon" type="image/png" href="{{ url_for('serve_image', filename='favicon.png') }}" />
+  <style>
+    /* Professional Smooth Navigation Indicator */
+    #nav-indicator{
+      position:absolute; border-radius:.75rem; background:#015486;
+      box-shadow:0 4px 12px rgba(1, 84, 134, 0.3);
+      transition:all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity:0; pointer-events:none;
+      transform-origin: center;
+    }
+        /* Keep links above the pill */
+        .nav-a{ 
+            position:relative; 
+            z-index:10; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-a:hover {
+            transform: translateY(-1px);
+        }
+
+        /* ✅ Desktop-only: active link becomes white */
+        @media (min-width:768px){
+        .nav-a.is-active, .nav-a.is-active * { color:#fff !important; }
+        }
+        /* ✅ Mobile: keep active link dark on white background */
+        @media (max-width:767px){
+        .nav-a.is-active, .nav-a.is-active * { color:#111827 !important; } /* Tailwind gray-900 */
+        }
+
+        /* Smoother top/bottom fade on the card itself */
+        .card-fade{
+        -webkit-mask-image: linear-gradient(to bottom,
+            transparent 0, black 20px,
+            black calc(100% - 20px), transparent 100%);
+                mask-image: linear-gradient(to bottom,
+            transparent 0, black 20px,
+            black calc(100% - 20px), transparent 100%);
+        }
+        @media (min-width:768px){
+        .card-fade{
+            -webkit-mask-image: linear-gradient(to bottom,
+            transparent 0, black 26px,
+            black calc(100% - 26px), transparent 100%);
+                    mask-image: linear-gradient(to bottom,
+            transparent 0, black 26px,
+            black calc(100% - 26px), transparent 100%);
+        }
+        }
+
+        /* Optimized Diya glow animation */
+        @keyframes diya-glow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .animate-diya-glow {
+            animation: diya-glow 3s ease-in-out infinite;
+            will-change: opacity, transform;
+        }
+    /* Add a subtle dark overlay to make the orange text more readable on the background image */
+    .bg-overlay {
+        background-color: rgba(0, 0, 0, 0.4); /* 40% opaque black overlay */
+    }
+    /* You can define the glow animation here if needed, 
+       but for simplicity, I'm focusing on layout changes. */
+  </style>
+</head>
+<body class="flex flex-col min-h-screen bg-white text-gray-800">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow sticky top-0 z-50">
+      <div class="flex items-center justify-between px-6 h-[72px]"> <!-- fixed height -->
+        
+        <!-- Logo -->
+        <div class="flex items-center space-x-2">
+          <a href="{{ url_for('home') }}" class="flex items-center">
+            <img src="img/Gusto_Nav_Logo.png"
+                alt="GUSTO Logo"
+                class="h-[70px] w-auto -my-4 rounded-full" /> <!-- logo bigger, negative margin -->
+          </a>
+              <div class="flex flex-col md:flex-row items-center">
+              <!-- GUSTO -->
+              <span class="font-extrabold lg:text-3xl font-[Merriweather,serif]">
+                  GUSTO
+              </span>
+  
+              <!-- Myanmar text -->
+              <span
+                  class="ml-1 font-normal font-[Noto_Sans_Myanmar] whitespace-nowrap
+                      text-base md:text-xl max-[330px]:text-sm">
+                  သီတင်းကျွတ်ပွဲတော်
+              </span>
+              </div>
+  
+        </div>
+  
+        <!-- Hamburger -->
+        <button id="menu-btn" class="block md:hidden text-2xl p-2" aria-label="Open menu">&#9776;</button>
+  
+        <!-- Links -->
+        <div id="nav-links"
+            class="hidden md:flex flex-col md:flex-row items-start md:items-center
+                    space-y-2 md:space-y-0 md:space-x-4 bg-white px-4 py-4 md:p-0
+                    rounded-none md:rounded-full fixed md:static top-[64px] left-0
+                    w-full md:w-auto z-40 shadow md:shadow-none">
+  
+          <div class="relative md:flex md:items-center">
+            <!-- Moving pill -->
+            <span id="nav-indicator" aria-hidden="true"
+                  class="hidden md:block absolute top-0 left-0 rounded-xl bg-[#015486] shadow-lg"></span>
+  
+            <ul class="flex flex-col md:flex-row w-full md:w-auto space-y-2 md:space-y-0 md:space-x-2 font-medium">
+              <li><a href="{{ url_for('home') }}"           class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Home</a></li>
+              <li><a href="{{ url_for('candidates') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Candidate</a></li>
+              <li><a href="{{ url_for('lantern') }}"        class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Lantern</a></li>
+              <li><a href="{{ url_for('mote_phoe') }}"      class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Mote Phoe</a></li>
+              <li><a href="{{ url_for('results') }}"  class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Voting Result</a></li>
+              <li><a href="{{ url_for('about') }}"       class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">About Us</a></li>
+              <li><a href="{{ url_for('final') }}"          class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Final</a></li>
+              <li><a href="{{ url_for('winner') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Winner</a></li>
+              <li><a href="{{ url_for('logout') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Logout</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="bg-[url('img/motephoe.jpg')] h-auto bg-cover bg-center relative flex-grow flex flex-col justify-center items-center text-center font-sans overflow-hidden p-4 md:p-8">
+    
+    <div class="bg-overlay p-4 sm:p-10 rounded-xl w-full max-w-6xl mx-auto my-10">
+
+      <br>
+      <h1 class="text-4xl sm:text-5xl md:text-6xl text-orange-400 font-extrabold mb-6 sm:mb-8 tracking-tight drop-shadow-lg">
+          "သီတင်းကျွတ်<br><br>မုန့်ဖိုးယူ"
+      </h1><br>
+      
+      <div class="max-w-5xl text-orange-500 text-base sm:text-lg leading-loose px-2 mx-auto">
+          
+          <div class="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-10 text-center">
+    
+            <div class="md:w-1/3 p-4 order-2 md:order-1 mt-6 md:mt-0">
+              <div class="text-orange-400 text-sm sm:text-base md:text-[15px] font-bold text-center leading-relaxed">
+                မြန်မာသက္ကရာဇ်<br> ၁၃၈၇ ခုနှစ်,<br>
+                သီတင်းကျွတ်လဆန်း<br>
+                ၉ ရက်နေ့
+              </div>
+            </div>
+    
+            <div class="md:w-2/3 p-4 order-2 md:order-1">
+              <div class="text-orange-300 text-base sm:text-lg md:text-[17px] text-center leading-loose">
+                ပျော်ရွှင်စရာသီတင်းကျွတ်အချိန်အခါမှာ<br>
+                ကျွန်တော်တို့ရဲ့ ဂါရဝပြုမှုကို<br>
+                အသိအမှတ်ပြုပြီး ကျွန်တော်တို့ကို<br> ပျော်ရွင်စေချင်သောစိတ်ဖြင့် <br>
+                ဆရာ၊ဆရာမ များမှ<br> စုပေါင်းပြီး သီတင်းကျွတ်မုန့်ဖိုးများပေးတဲ့<br> 
+                အစီအစဉ်လေးဖြစ်တဲ့အတွက် <br>
+                အားလုံးဝင်ရောက် ကံစမ်းနိုင်ပါတယ်။
+              </div>
+            </div>
+            
+          </div>
+          
+      </div>
+
+      <!-- Add disabled class behind onclick -->
+      <br class="hidden md:block"> <button id="claim-btn" onclick="openTokenModal()" class="px-10 h-[72px] w-72 bg-orange-500/95 text-black rounded-full shadow-2xl hover:bg-orange-600 transition duration-300 ease-in-out font-extrabold text-xl disabled:opacity-60 disabled:cursor-not-allowed mt-8 mb-3" title="Temporarily disabled">
+          မုန့်ဖိုးသွားယူရအောင်!
+      </button>
+
+      <div class="mt-2 mb-2">
+        <span class="inline-block bg-white/15 backdrop-blur-sm border border-white/30 text-orange-100 text-sm sm:text-base px-4 py-2 rounded-full shadow">
+          ပွဲပြီးတဲ့အထိ စောင့်ပေးနော်၊ ပြီးရင် မုန့်ဖိုးရမယ်။ အများဆုံး 30,000 ထိရနိုင်တယ်ဗျ၊ ဗလာလည်းမပါပါဘူးခင်ဗျာ !!!
+        </span>
+      </div>
+
+      <div id="reward-container" class="hidden mt-4">
+        <div class="mx-auto max-w-xl bg-white/15 backdrop-blur-sm border border-white/30 rounded-2xl px-6 py-5 shadow-xl">
+          <div class="flex items-baseline justify-between gap-4 mb-2">
+            <p class="text-orange-200 text-base sm:text-lg font-semibold">Your Reward</p>
+            <p id="reward-token" class="text-xs sm:text-sm text-white/90 bg-black/30 rounded-full px-3 py-1 tracking-widest font-mono">TOKEN: ————</p>
+          </div>
+          <p id="reward-value" class="text-3xl sm:text-4xl font-extrabold text-yellow-300 drop-shadow">—</p>
+        </div>
+      </div>
+
+      <p class="text-orange-400 p-[10px] sm:p-[20px] text-xl sm:text-2xl font-bold">
+          ဂါရဝပြုပါ သီတင်းကျွတ် ချိန်ခါ!
+          <img src="img/SeMeeKut.png" class="inline w-[24px] h-[24px] mx-1 md:w-[36px] md:h-[36px] animate-diya-glow" alt="Diya/Lamp" />
+      </p>
+
+    </div> </main>
+
+    <!-- Token Modal (style aligned with lantern modal) -->
+    <div id="token-modal" class="fixed inset-0 z-[60] hidden">
+      <div class="absolute inset-0 bg-black/60" onclick="closeTokenModal()"></div>
+      <div class="relative mx-auto my-8 w-[92%] max-w-[560px]">
+        <div class="relative rounded-2xl overflow-hidden shadow-2xl">
+          <div class="relative w-full" style="--modal-h: 520px;">
+            <div class="relative w-full" style="height: var(--modal-h);">
+              <img src="{{ url_for('serve_image', filename='token.png') }}" alt="Token" class="absolute inset-0 w-full h-full object-contain bg-transparent" />
+              <div class="absolute inset-0 pointer-events-none bg-[radial-gradient(circle_at_center,rgba(0,0,0,0)_0%,rgba(0,0,0,0)_60%,rgba(0,0,0,0.25)_100%)]"></div>
+              <div class="absolute left-1/2 top-[58%] -translate-x-1/2 -translate-y-1/2 w-[78%] max-w-xs">
+                <div class="backdrop-blur-[2px] bg-white/40 rounded-lg shadow p-2">
+                  <input id="token-text" maxlength="6" autocomplete="off" inputmode="latin" pattern="[A-Za-z0-9]{6}" class="w-full text-center tracking-widest rounded-md border border-white/60 focus:ring-2 focus:ring-orange-500 focus:border-orange-500 px-3 py-2 font-mono text-base bg-transparent placeholder-white/70 text-gray-900" placeholder="TOKEN" />
+                </div>
+                <p id="token-error" class="hidden text-red-600 text-sm mt-2 text-center">Enter 6 characters.</p>
+                <div class="mt-3 flex items-center justify-center gap-2">
+                  <button type="button" onclick="submitToken()" class="min-w-[96px] px-4 py-2.5 rounded-md bg-gradient-to-r from-orange-500 to-orange-600 text-white font-semibold shadow hover:from-orange-600 hover:to-orange-700">OK</button>
+                  <button type="button" onclick="closeTokenModal()" class="min-w-[96px] px-4 py-2.5 rounded-md border border-white/70 text-white bg-black/20 hover:bg-black/30">Cancel</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Mobile nav toggle
+      const menuBtn = document.getElementById('menu-btn');
+      const navLinks = document.getElementById('nav-links');
+      if (menuBtn && navLinks) menuBtn.addEventListener('click', () => navLinks.classList.toggle('hidden'));
+
+      // Toast (reused from lantern style)
+      const toastRootId = 'toast-root';
+      function ensureToastRoot(){
+        let root = document.getElementById(toastRootId);
+        if(!root){
+          root = document.createElement('div');
+          root.id = toastRootId;
+          root.className = 'fixed inset-0 z-[70] pointer-events-none flex items-center justify-center';
+          document.body.appendChild(root);
+        }
+        return root;
+      }
+      function showToast(message, type){
+        const root = ensureToastRoot();
+        const el = document.createElement('div');
+        el.className = `pointer-events-auto px-5 py-4 rounded-xl shadow-2xl text-white text-base md:text-lg ${type==='success'?'bg-green-600/95':'bg-red-600/95'} backdrop-blur-sm`;
+        el.textContent = message || (type==='success'?'Done.':'Something went wrong.');
+        root.appendChild(el);
+        setTimeout(() => { el.classList.add('opacity-0','transition-opacity','duration-300'); setTimeout(()=> el.remove(), 320); }, 1800);
+      }
+
+      let submitting = false;
+      function openTokenModal(){
+        const modal = document.getElementById('token-modal');
+        const input = document.getElementById('token-text');
+        const error = document.getElementById('token-error');
+        if(modal){
+          modal.classList.remove('hidden');
+          input.value = '';
+          error.classList.add('hidden');
+          setTimeout(() => input.focus(), 50);
+        }
+      }
+      function closeTokenModal(){
+        const modal = document.getElementById('token-modal');
+        if(modal){ modal.classList.add('hidden'); }
+      }
+      function submitToken(){
+        if(submitting) return;
+        const input = document.getElementById('token-text');
+        const error = document.getElementById('token-error');
+        const token = (input?.value || '').trim();
+        if(token.length !== 6){
+          error.classList.remove('hidden');
+          showToast('Please enter the 6-character token.', 'error');
+          return;
+        }
+        submitting = true;
+        fetch('/reward_claim', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token })
+        })
+        .then(r=>r.json())
+        .then(d=>{
+          if(d.success){
+            showToast('Token verified successfully.', 'success');
+            const box = document.getElementById('reward-container');
+            const val = document.getElementById('reward-value');
+            const tok = document.getElementById('reward-token');
+            if(val){ val.textContent = d.reward_value != null ? d.reward_value : '—'; }
+            if(tok){ tok.textContent = `TOKEN: ${d.token || '———'}`; }
+            if(box){ box.classList.remove('hidden'); }
+          }else{
+            showToast(d.message || 'Invalid token', 'error');
+          }
+        })
+        .catch(()=> showToast('Something went wrong. Please try again.', 'error'))
+        .finally(()=>{ submitting = false; closeTokenModal(); });
+      }
+    </script>
+
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+    
+    <!-- Footer -->
+    <footer class="bg-[#03254C] py-4 px-4 md:py-5 md:px-8 h-auto md:h-[200px]">
+      <div class="flex flex-col md:flex-row justify-between items-center h-full text-center">
+          <div class="text-orange-400 font-medium text-base lg:text-xl mb-3 md:mb-0 ml-0 md:ml-[100px] pr-0 md:pr-4 order-1">ပျော်ရွှင်စရာသတင်းကျွတ်အချိန်အခါလေးဖြစ်ပါစေ</div>
+          <div class="flex justify-center items-center py-2 order-2 flex-grow-0">
+            <img src="img/SeMeeKut.png" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+            <img src="img/SeMeeKut.png" alt="Diya" class="w-[50px] h-[50px] -mt-3 mx-1 md:w-[70px] md:h-[70px] md:-mt-4 animate-diya-glow" />
+            <img src="img/SeMeeKut.png" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+          </div>
+          <div class="flex flex-col items-center md:items-end text-orange-400 font-medium text-base md:text-lg lg:text-xl mt-3 md:mt-0 mr-0 md:mr-[100px] pl-0 md:pl-4 order-3">
+            <div class="flex flex-wrap justify-center md:justify-end w-[370px] lg:justify-center space-x-4 md:space-x-6 mb-1 md:mb-0 font-[fa-chevron-left]">
+                <a href="{{ url_for('home') }}" class="hover:text-yellow-400">Home</a>
+                <a href="{{ url_for('candidates') }}" class="hover:text-yellow-400">Candidate</a>
+                <a href="{{ url_for('lantern') }}" class="hover:text-yellow-400">Lantern</a>
+            </div>
+            <br>
+            <div class="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-6 mt-1 md:mt-1 font-[fa-chevron-left]">
+                <a href="{{ url_for('results') }}" class="hover:text-yellow-400">Voting Result</a>
+                <a href="{{ url_for('about') }}" class="hover:text-yellow-400">About us</a>
+                <a href="{{ url_for('final') }}" class="hover:text-yellow-400">Final</a>
+                <a href="{{ url_for('winner') }}" class="hover:text-yellow-400">Winner</a>
+            </div>
+          </div>
+      </div>
+    </footer>
+
+</body>
+</html>

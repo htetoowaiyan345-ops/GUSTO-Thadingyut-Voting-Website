@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GUSTO Thadingyut Voting</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" type="image/png" href="img/favicon.png" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&display=swap" rel="stylesheet">
+
+  <style>
+    /* ===== NAV ===== */
+    #nav-indicator{position:absolute;border-radius:.75rem;background:#015486;box-shadow:0 4px 12px rgba(1,84,134,.3);transition:all .6s cubic-bezier(.4,0,.2,1);opacity:0;pointer-events:none;transform-origin:center}
+    .nav-a{position:relative;z-index:10}
+    @media (min-width:768px){.nav-a.is-active,.nav-a.is-active *{color:#fff!important}}
+    @media (max-width:767px){.nav-a.is-active,.nav-a.is-active *{color:#111827!important}}
+
+    /* ===== Message box (unchanged from yours) ===== */
+    @keyframes diya-glow{0%{filter:brightness(1) drop-shadow(0 0 0 #FFD700)}40%{filter:brightness(1.3) drop-shadow(0 0 16px #FFD700)}60%{filter:brightness(1.1) drop-shadow(0 0 8px #FFD700)}100%{filter:brightness(1) drop-shadow(0 0 0 #FFD700)}}
+    .animate-diya-glow{animation:diya-glow 2s infinite}
+    .message-box{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;max-width:400px;width:90%;border-radius:16px;box-shadow:0 20px 40px rgba(0,0,0,.15);backdrop-filter:blur(10px);animation:messageBoxSlideIn .4s cubic-bezier(.4,0,.2,1)}
+    .message-box.success{background:linear-gradient(135deg,#10B981 0%,#059669 100%);border:2px solid #34D399}
+    .message-box.error{background:linear-gradient(135deg,#EF4444 0%,#DC2626 100%);border:2px solid #F87171}
+    .message-box-content{padding:24px;text-align:center;color:#fff}
+    .message-box-icon{font-size:48px;margin-bottom:16px;animation:messageBoxBounce .6s ease-out}
+    .message-box-title{font-size:20px;font-weight:700;margin-bottom:8px;text-shadow:0 2px 4px rgba(0,0,0,.2)}
+    .message-box-message{font-size:16px;opacity:.9;line-height:1.5}
+    .message-box-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;animation:messageBoxFadeIn .3s ease-out}
+    @keyframes messageBoxSlideIn{0%{opacity:0;transform:translate(-50%,-50%) scale(.8)}100%{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+    @keyframes messageBoxBounce{0%,20%,50%,80%,100%{transform:translateY(0)}40%{transform:translateY(-10px)}60%{transform:translateY(-5px)}}
+    @keyframes messageBoxFadeIn{0%{opacity:0}100%{opacity:1}}
+
+  /* ================= FLIP COUNTDOWN ================= */
+  /* theme + spacing consistent with your page */
+  #launch-countdown, #launch-countdown *{
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-variant-numeric: tabular-nums; font-feature-settings:"tnum" 1;
+  }
+
+  .fc-piece{display:flex;flex-direction:column;align-items:center;gap:.5rem}
+  .fc-label{letter-spacing:.18em;color:#6B7280;font-size:.75rem;font-weight:600}
+
+  /* Card sizes */
+  .fc-card{
+    position:relative;display:inline-block;width:88px;height:112px;
+    perspective: 900px;                 /* add perspective for cleaner 3D */
+  }
+  .fc-shell{
+    position:relative;width:100%;height:100%;
+    background:#0F2940;border-radius:18px;
+    box-shadow:0 14px 32px rgba(0,0,0,.18), inset 0 -4px 0 rgba(255,255,255,.06);
+    overflow:hidden
+  }
+
+  /* halves (static) */
+  .fc-top,.fc-bottom,.fc-back .fc-topBack,.fc-back .fc-bottomBack{
+    position:absolute;left:0;right:0;height:56px;overflow:hidden;
+    background:#14314b;color:#D5731E;font-weight:800;font-size:44px;
+    border-radius:18px 18px 0 0;
+    transform-style:preserve-3d;backface-visibility:hidden;
+  }
+  .fc-top{top:0;border-bottom:1px solid rgba(255,255,255,.10)}
+  .fc-bottom{bottom:0;border-radius:0 0 18px 18px}
+
+  /* inner glyph spans: 112px tall so both halves clip same digit */
+  .fc-top>span,.fc-bottom>span,.fc-back .fc-topBack>span,.fc-back .fc-bottomBack>span{
+    display:block;height:112px;line-height:112px;text-align:center;
+    backface-visibility:hidden;transform-style:preserve-3d;transform: translateZ(0.1px);
+  }
+
+  /* bottom shows lower half of the same glyph */
+  .fc-bottom>span,.fc-back .fc-bottomBack>span{transform:translateY(-56px)}
+
+  /* animated overlay (hidden unless flipping) */
+  .fc-back{position:absolute;inset:0;pointer-events:none}
+  .fc-back .fc-topBack,.fc-back .fc-bottomBack{opacity:0}
+
+  /* flip timing — change .80s to make slower/faster.
+    JS should use the same number in DURATION_MS to stay in sync. */
+  .flip .fc-back .fc-topBack{
+    animation:fcFlipTop .80s ease-in-out both;
+    transform-origin:center bottom;opacity:1
+  }
+  .flip .fc-back .fc-bottomBack{
+    animation:fcFlipBottom .80s ease-in-out both;
+    transform-origin:center top;opacity:1
+  }
+
+  /* Top half rotates away quickly */
+  @keyframes fcFlipTop{
+    0%  {transform:rotateX(0deg);  z-index:3; opacity:1}
+    100%{transform:rotateX(-90deg);z-index:3; opacity:1}
+  }
+
+  /* Bottom half stays hidden until near the end (no early peek) */
+  @keyframes fcFlipBottom{
+    0%, 92% {transform:rotateX(90deg); z-index:2; opacity:0}
+    93%     {opacity:1}
+    100%    {transform:rotateX(0deg);  z-index:4; opacity:1}
+  }
+
+  @media (max-width:420px){
+    .fc-card{width:76px;height:100px}
+    .fc-top,.fc-bottom,.fc-back .fc-topBack,.fc-back .fc-bottomBack{height:50px}
+    .fc-top>span,.fc-bottom>span,.fc-back .fc-topBack>span,.fc-back .fc-bottomBack>span{height:100px;line-height:100px}
+    .fc-bottom>span,.fc-back .fc-bottomBack>span{transform:translateY(-50px)}
+  }
+
+  </style>
+</head>
+
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="flex items-center justify-between px-6 h-[72px]">
+      <div class="flex items-center space-x-2">
+        <a href="{{ url_for('home') }}" class="flex items-center">
+          <img src="img/Gusto_Nav_Logo.png" alt="GUSTO Logo" class="h-[70px] w-auto -my-4 rounded-full" />
+        </a>
+            <div class="flex flex-col md:flex-row items-center">
+          <span class="font-extrabold lg:text-3xl font-[Merriweather,serif]">GUSTO</span>
+          <span class="ml-1 font-normal whitespace-nowrap text-base md:text-xl max-[330px]:text-sm">သီတင်းကျွတ်ပွဲတော်</span>
+            </div>
+      </div>
+
+      <button id="menu-btn" class="block md:hidden text-2xl p-2" aria-label="Open menu">&#9776;</button>
+
+      <div id="nav-links"
+           class="hidden md:flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4 bg-white px-4 py-4 md:p-0 rounded-none md:rounded-full fixed md:static top-[64px] left-0 w-full md:w-auto z-40 shadow md:shadow-none">
+        <div class="relative md:flex md:items-center">
+          <span id="nav-indicator" aria-hidden="true" class="hidden md:block absolute top-0 left-0 rounded-xl bg-[#015486] shadow-lg"></span>
+          <ul class="flex flex-col md:flex-row w-full md:w-auto space-y-2 md:space-y-0 md:space-x-2 font-medium">
+            <li><a href="{{ url_for('home') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Home</a></li>
+            <li><a href="{{ url_for('candidates') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Candidate</a></li>
+            <li><a href="{{ url_for('lantern') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Lantern</a></li>
+            <li><a href="{{ url_for('mote_phoe') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Mote Phoe</a></li>
+            <li><a href="{{ url_for('results') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Voting Result</a></li>
+            <li><a href="{{ url_for('about') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">About Us</a></li>
+            <li><a href="{{ url_for('final') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Final</a></li>
+            <li><a href="{{ url_for('winner') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Winner</a></li>
+            <li><a href="{{ url_for('logout') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="max-w-[75%] mx-auto px-4 sm:px-6 md:px-8 mt-6 mb-10">
+
+    <!-- ===== Flip Countdown ===== -->
+    <section class="my-5 md:my-6">
+      <div class="max-w-2xl mx-auto text-center">
+        <h2 class="text-[30px] tracking-[0.35em] md:text-xl font-semibold text-gray-500 mb-2">
+          VOTING WILL BE CLOSING IN
+        </h2>
+
+        <div id="launch-countdown"
+             class="grid grid-cols-2 sm:grid-cols-4 gap-x-4 gap-y-3 md:gap-x-6 justify-items-center"
+             data-deadline="2025-09-26T12:00:00+06:30">
+          <!-- DAYS -->
+          <div class="fc-piece" data-key="d">
+            <div class="fc-card">
+              <div class="fc-shell">
+                <b class="fc-top"><span>00</span></b>
+                <b class="fc-bottom"><span>00</span></b>
+                <b class="fc-back">
+                  <b class="fc-topBack"><span>00</span></b>
+                  <b class="fc-bottomBack"><span>00</span></b>
+                </b>
+              </div>
+            </div>
+            <span class="fc-label">DAYS</span>
+          </div>
+
+          <!-- HOURS -->
+          <div class="fc-piece" data-key="h">
+            <div class="fc-card">
+              <div class="fc-shell">
+                <b class="fc-top"><span>00</span></b>
+                <b class="fc-bottom"><span>00</span></b>
+                <b class="fc-back">
+                  <b class="fc-topBack"><span>00</span></b>
+                  <b class="fc-bottomBack"><span>00</span></b>
+                </b>
+              </div>
+            </div>
+            <span class="fc-label">HOURS</span>
+          </div>
+
+          <!-- MINUTES -->
+          <div class="fc-piece" data-key="m">
+            <div class="fc-card">
+              <div class="fc-shell">
+                <b class="fc-top"><span>00</span></b>
+                <b class="fc-bottom"><span>00</span></b>
+                <b class="fc-back">
+                  <b class="fc-topBack"><span>00</span></b>
+                  <b class="fc-bottomBack"><span>00</span></b>
+                </b>
+              </div>
+            </div>
+            <span class="fc-label">MINUTES</span>
+          </div>
+
+          <!-- SECONDS -->
+          <div class="fc-piece" data-key="s">
+            <div class="fc-card">
+              <div class="fc-shell">
+                <b class="fc-top"><span>00</span></b>
+                <b class="fc-bottom"><span>00</span></b>
+                <b class="fc-back">
+                  <b class="fc-topBack"><span>00</span></b>
+                  <b class="fc-bottomBack"><span>00</span></b>
+                </b>
+              </div>
+            </div>
+            <span class="fc-label">SECONDS</span>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- ===== End Countdown ===== -->
+
+    <h2 class="text-2xl font-semibold text-center font-[fa-chevron-left]">Candidate Lists</h2>
+
+    <!-- Tabs -->
+    <div class="flex gap-3 mt-6 justify-center md:justify-start">
+      <button id="tab-king" class="px-6 py-3 rounded-full font-semibold bg-orange-500 text-white font-[fa-chevron-left]">King</button>
+      <button id="tab-queen" class="px-6 py-3 rounded-full font-semibold bg-gray-200 text-gray-800 font-[fa-chevron-left]">Queen</button>
+    </div>
+
+    <!-- Replace single grid with two grids: one for kings (visible) and one for queens (hidden) -->
+    <section id="grid-king" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 font-[fa-chevron-left]">
+      {% for king in kings %}
+      <article class="bg-white rounded-2xl border shadow-[0_10px_20px_rgba(0,0,0,0.12)] overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
+        <img src="{{ king.image_path }}" alt="{{ king.name }}" class="w-full h-[239px] object-cover transition-transform duration-300 hover:scale-105">
+        <div class="px-5 py-4">
+          <div class="flex items-center justify-between leading-none font-medium lg:h-[50px] sm:h-[50px] text-gray-900 mb-3">
+            <span>{{ king.name }}</span><span>{{ king.batch }}</span>
+          </div>
+          <div class="flex gap-3">
+            <a href="{{ url_for('viewmore', id=king.name.replace(' ', '_')) }}" class="flex-1 text-center text-[16px] py-2 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200 shadow">View more</a>
+            <button disabled class="flex-1 text-[16px] py-2 rounded-full bg-gray-400 text-white cursor-not-allowed transition-colors duration-200 shadow opacity-60">Vote</button>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+
+    <!-- Queen grid (hidden by default) — ensure your view supplies a `queens` list -->
+    <section id="grid-queen" class="hidden grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mt-8 font-[fa-chevron-left]">
+      {% for queen in queens %}
+      <article class="bg-white rounded-2xl border shadow-[0_10px_20px_rgba(0,0,0,0.12)] overflow-hidden transition-all duration-300 ease-out hover:shadow-lg hover:-translate-y-1">
+        <img src="{{ queen.image_path }}" alt="{{ queen.name }}" class="w-full h-[239px] object-cover transition-transform duration-300 hover:scale-105">
+        <div class="px-5 py-4">
+          <div class="flex items-center justify-between leading-none font-medium lg:h-[50px] sm:h-[50px] text-gray-900 mb-3">
+            <span>{{ queen.name }}</span><span>{{ queen.batch }}</span>
+          </div>
+          <div class="flex gap-3">
+            <a href="{{ url_for('viewmore', id=queen.name.replace(' ', '_')) }}" class="flex-1 text-center text-[16px] py-2 rounded-full bg-gray-100 text-gray-800 hover:bg-gray-200 transition-colors duration-200 shadow">View more</a>
+            <button disabled class="flex-1 text-[16px] py-2 rounded-full bg-gray-400 text-white cursor-not-allowed transition-colors duration-200 shadow opacity-60">Vote</button>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </section>
+  </main>
+
+  <!-- Footer (unchanged) -->
+   <footer class="bg-[#03254C] py-4 px-4 md:py-5 md:px-8 h-auto md:h-[200px]">
+    <div class="flex flex-col md:flex-row justify-between items-center h-full text-center">
+      <div class="text-orange-400 font-medium text-base lg:text-xl mb-3 md:mb-0 ml-0 md:ml-[100px] pr-0 md:pr-4 order-1">
+        ပျော်ရွှင်စရာသတင်းကျွတ်အချိန်အခါလေးဖြစ်ပါစေ
+        </div>
+        <div class="flex justify-center items-center py-2 order-2 flex-grow-0">
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[50px] h-[50px] -mt-3 mx-1 md:w-[70px] md:h-[70px] md:-mt-4 animate-diya-glow" />
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        </div>
+      <div class="flex flex-col items-center md:items-end text-orange-400 font-medium text-base md:text-lg lg:text-xl mt-3 md:mt-0 mr-0 md:mr-[100px] pl-0 md:pl-4 order-3">
+        <div class="flex flex-wrap justify-center md:justify-end w-[370px] lg:justify-center space-x-4 md:space-x-6 mb-1 md:mb-0 font-[fa-chevron-left]">
+            <a href="{{ url_for('home') }}" class="hover:text-yellow-400">Home</a>
+            <a href="{{ url_for('candidates') }}" class="hover:text-yellow-400">Candidate</a>
+            <a href="{{ url_for('lantern') }}" class="hover:text-yellow-400">Lantern</a>
+        </div>
+        <br>
+        <div class="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-6 mt-1 md:mt-1 font-[fa-chevron-left]">
+            <a href="{{ url_for('results') }}" class="hover:text-yellow-400">Voting Result</a>
+            <a href="{{ url_for('about') }}" class="hover:text-yellow-400">About us</a>
+            <a href="{{ url_for('final') }}" class="hover:text-yellow-400">Final</a>
+            <a href="{{ url_for('winner') }}" class="hover:text-yellow-400">Winner</a>
+        </div>
+        </div>
+    </div>
+    </footer>
+
+    <!-- Mobile nav toggle -->
+    <script>
+    const menuBtn = document.getElementById('menu-btn');
+    const navLinks = document.getElementById('nav-links');
+    if (menuBtn && navLinks) menuBtn.addEventListener('click', () => navLinks.classList.toggle('hidden'));
+    </script>
+    
+  <!-- Your navigation.js -->
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+
+  <!-- Flip countdown logic -->
+    <script>
+  (() => {
+    const root = document.getElementById('launch-countdown');
+    if (!root) return;
+
+    const target = new Date(root.dataset.deadline); // Yangon +06:30 provided in data-deadline
+    const pad2 = n => String(n).padStart(2,'0');
+
+    const pieces = {
+      d: root.querySelector('.fc-piece[data-key="d"]'),
+      h: root.querySelector('.fc-piece[data-key="h"]'),
+      m: root.querySelector('.fc-piece[data-key="m"]'),
+      s: root.querySelector('.fc-piece[data-key="s"]'),
+    };
+
+    let prev = { d:null, h:null, m:null, s:null };
+    let stopped = false;
+    const DURATION_MS = 800; // keep in sync with CSS
+
+    function compute(){
+      let diff = target - new Date();
+      if (diff <= 0){ stopped = true; return {d:'00',h:'00',m:'00',s:'00'}; }
+      const d = pad2(Math.floor(diff / 86400000)); diff %= 86400000;
+      const h = pad2(Math.floor(diff / 3600000));  diff %= 3600000;
+      const m = pad2(Math.floor(diff / 60000));    diff %= 60000;
+      const s = pad2(Math.floor(diff / 1000));
+      return {d,h,m,s};
+    }
+
+    function setTile(piece, oldVal, newVal, doFlip){
+      const topSpan = piece.querySelector('.fc-top > span');
+      const botSpan = piece.querySelector('.fc-bottom > span');
+      const backTop = piece.querySelector('.fc-topBack > span');
+      const backBot = piece.querySelector('.fc-bottomBack > span');
+
+      if (!doFlip){
+        topSpan.textContent = newVal;
+        botSpan.textContent = newVal;
+        piece.classList.remove('flip');
+        backTop.textContent = '';
+        backBot.textContent = '';
+        return;
+      }
+
+      // start: show OLD everywhere
+      topSpan.textContent = oldVal;
+      botSpan.textContent = oldVal;
+
+      // overlay: top folds OLD; bottom reveals NEW late
+      backTop.textContent = oldVal;
+      backBot.textContent = newVal;
+
+      piece.classList.remove('flip'); void piece.offsetWidth; piece.classList.add('flip');
+
+      // finish: lock NEW into static halves
+      setTimeout(() => {
+        topSpan.textContent = newVal;
+        botSpan.textContent = newVal;
+        piece.classList.remove('flip');
+        backTop.textContent = '';
+        backBot.textContent = '';
+      }, DURATION_MS + 10);
+    }
+
+    function render(){
+      const cur = compute();
+      [['d','Days'],['h','Hours'],['m','Minutes'],['s','Seconds']].forEach(([k])=>{
+        const flip = prev[k] !== null && prev[k] !== cur[k];
+        setTile(pieces[k], flip ? prev[k] : cur[k], cur[k], flip);
+      });
+      prev = cur;
+    }
+
+    function loop(){
+      render();
+      if (stopped) return;
+      const ms = 1000 - (Date.now() % 1000); // align to next second
+      setTimeout(loop, ms + 5);
+    }
+    loop();
+  })();
+  </script>
+
+  <!-- Tabs + voting JS -->
+  <script>
+    const tabKing = document.getElementById('tab-king');
+    const tabQueen = document.getElementById('tab-queen');
+    const gridKing = document.getElementById('grid-king');
+    const gridQueen = document.getElementById('grid-queen');
+
+    function setActiveTab(role){
+      if(role === 'king'){
+        tabKing.classList.add('bg-orange-500','text-white'); tabKing.classList.remove('bg-gray-200','text-gray-800');
+        tabQueen.classList.add('bg-gray-200','text-gray-800'); tabQueen.classList.remove('bg-orange-500','text-white');
+        gridKing.classList.remove('hidden'); gridQueen.classList.add('hidden');
+      } else {
+        tabQueen.classList.add('bg-orange-500','text-white'); tabQueen.classList.remove('bg-gray-200','text-gray-800');
+        tabKing.classList.add('bg-gray-200','text-gray-800'); tabKing.classList.remove('bg-orange-500','text-white');
+        gridQueen.classList.remove('hidden'); gridKing.classList.add('hidden');
+      }
+    }
+
+    if(tabKing) tabKing.addEventListener('click', () => setActiveTab('king'));
+    if(tabQueen) tabQueen.addEventListener('click', () => setActiveTab('queen'));
+
+    // Professional Message Box helper
+    function showMessageBox(type, title, message){
+      const existing = document.querySelector('.message-box-overlay');
+      if (existing) existing.remove();
+      const overlay = document.createElement('div');
+      overlay.className = 'message-box-overlay';
+      const box = document.createElement('div');
+      box.className = `message-box ${type}`;
+      const icon = type === 'success' ? '🎉' : '⚠️';
+      box.innerHTML = `
+        <div class="message-box-content">
+          <div class="message-box-icon">${icon}</div>
+          <div class="message-box-title">${title}</div>
+          <div class="message-box-message">${message}</div>
+        </div>
+      `;
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+      setTimeout(()=>{
+        if (!overlay.parentNode) return;
+        overlay.style.animation = 'messageBoxFadeIn .3s ease-out reverse';
+        setTimeout(()=> overlay.remove(), 300);
+      }, 4000);
+      overlay.addEventListener('click', (e)=>{
+        if (e.target === overlay){
+          overlay.style.animation = 'messageBoxFadeIn .3s ease-out reverse';
+          setTimeout(()=> overlay.remove(), 300);
+        }
+      });
+    }
+
+    // Direct vote (no confirmation) — mirrors viewmore behavior
+    function voteCandidate(id, role){
+      const button = event && event.target ? event.target : null;
+      const originalText = button ? button.textContent : '';
+      if (button){
+      button.textContent = 'Voting...';
+      button.disabled = true;
+      }
+      
+      fetch('/vote', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `candidate_id=${encodeURIComponent(id)}&candidate_type=${encodeURIComponent(role)}`
+      })
+      .then(r => r.json())
+      .then(data => {
+        if (data.success){
+          if (button){
+          button.textContent = 'Voted!';
+            button.classList.remove('bg-[#015486]','hover:bg-[#004469]');
+            button.classList.add('bg-green-500','hover:bg-green-600');
+          }
+          showMessageBox('success', 'Vote Recorded!', data.message || 'Thank you for voting!');
+        } else {
+          if (button){
+          button.textContent = 'Error';
+          button.classList.add('bg-red-500');
+          }
+          showMessageBox('error', 'Voting Error', data.message || 'Please try again.');
+          setTimeout(()=>{
+            if (button){
+            button.textContent = originalText;
+            button.disabled = false;
+            button.classList.remove('bg-red-500');
+            }
+          }, 3000);
+        }
+      })
+      .catch(err => {
+        if (button){
+        button.textContent = 'Error';
+        button.classList.add('bg-red-500');
+        }
+        showMessageBox('error', 'Network Error', 'Please check your connection and try again.');
+        setTimeout(()=>{
+          if (button){
+          button.textContent = originalText;
+          button.disabled = false;
+          button.classList.remove('bg-red-500');
+          }
+        }, 3000);
+      });
+    }
+    // expose for inline onclick
+    window.voteCandidate = voteCandidate;
+
+    // initialize
+    setActiveTab('king');
+    </script>
+</body>
+</html>

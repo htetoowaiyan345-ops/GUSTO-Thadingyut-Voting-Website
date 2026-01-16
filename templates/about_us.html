@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="icon" type="image/png" href="{{ url_for('serve_image', filename='favicon.png') }}" />
+
+  <style>
+    /* Professional Smooth Navigation Indicator */
+    #nav-indicator{
+      position:absolute; border-radius:.75rem; background:#015486;
+      box-shadow:0 4px 12px rgba(1, 84, 134, 0.3);
+      transition:all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity:0; pointer-events:none;
+      transform-origin: center;
+    }
+    /* Keep links above the pill */
+    .nav-a{ position:relative; z-index:10; }
+
+    /* ✅ Desktop-only: active link becomes white */
+    @media (min-width:768px){
+      .nav-a.is-active, .nav-a.is-active * { color:#fff !important; }
+    }
+    /* ✅ Mobile: keep active link dark on white background */
+    @media (max-width:767px){
+      .nav-a.is-active, .nav-a.is-active * { color:#111827 !important; } /* Tailwind gray-900 */
+    }
+
+  
+    /* Cursor bar */
+    .cursor {
+      position: absolute;
+      width: 2px;
+      height: 1.2em;
+      background: black;
+      animation: blink 0.7s infinite;
+    }
+
+    /* Blink effect */
+    @keyframes blink {
+      0%, 50% { opacity: 1; }
+      51%, 100% { opacity: 0; }
+    }
+
+    /* Default text style */
+    #text span {
+      color: black; /* original */
+      transition: color 0.2s;
+    }
+    @keyframes diya-glow {
+      0%   { filter: brightness(1) drop-shadow(0 0 0px #FFD700); }
+      40%  { filter: brightness(1.3) drop-shadow(0 0 16px #FFD700); }
+      60%  { filter: brightness(1.1) drop-shadow(0 0 8px #FFD700); }
+      100% { filter: brightness(1) drop-shadow(0 0 0px #FFD700); }
+    }
+    .animate-diya-glow {
+      animation: diya-glow 2s infinite;
+    }
+    </style>
+
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="flex items-center justify-between px-6 h-[72px]"> <!-- fixed height -->
+      
+      <!-- Logo -->
+      <div class="flex items-center space-x-2">
+        <a href="{{ url_for('home') }}" class="flex items-center">
+          <img src="img/Gusto_Nav_Logo.png"
+              alt="GUSTO Logo"
+              class="h-[70px] w-auto -my-4 rounded-full" /> <!-- logo bigger, negative margin -->
+        </a>
+            <div class="flex flex-col md:flex-row items-center">
+            <!-- GUSTO -->
+            <span class="font-extrabold lg:text-3xl font-[Merriweather,serif]">
+                GUSTO
+            </span>
+
+            <!-- Myanmar text -->
+            <span
+                class="ml-1 font-normal font-[Noto_Sans_Myanmar] whitespace-nowrap
+                    text-base md:text-xl max-[330px]:text-sm">
+                သီတင်းကျွတ်ပွဲတော်
+            </span>
+            </div>
+
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menu-btn" class="block md:hidden text-2xl p-2" aria-label="Open menu">&#9776;</button>
+
+      <!-- Links -->
+      <div id="nav-links"
+          class="hidden md:flex flex-col md:flex-row items-start md:items-center
+                  space-y-2 md:space-y-0 md:space-x-4 bg-white px-4 py-4 md:p-0
+                  rounded-none md:rounded-full fixed md:static top-[64px] left-0
+                  w-full md:w-auto z-40 shadow md:shadow-none">
+
+        <div class="relative md:flex md:items-center">
+          <!-- Moving pill -->
+          <span id="nav-indicator" aria-hidden="true"
+                class="hidden md:block absolute top-0 left-0 rounded-xl bg-[#015486] shadow-lg"></span>
+
+          <ul class="flex flex-col md:flex-row w-full md:w-auto space-y-2 md:space-y-0 md:space-x-2 font-medium">
+            <li><a href="{{ url_for('home') }}"           class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Home</a></li>
+            <li><a href="{{ url_for('candidates') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Candidate</a></li>
+            <li><a href="{{ url_for('lantern') }}"        class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Lantern</a></li>
+            <li><a href="{{ url_for('mote_phoe') }}"        class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Mote Phoe</a></li>
+            <li><a href="{{ url_for('results') }}"  class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Voting Result</a></li>
+            <li><a href="{{ url_for('about') }}"       class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">About Us</a></li>
+            <li><a href="{{ url_for('final') }}"          class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Final</a></li>
+            <li><a href="{{ url_for('winner') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Winner</a></li>
+            <li><a href="{{ url_for('logout') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+
+  <section class="max-w-7xl mx-auto px-3 sm:px-6 py-12 sm:py-16">
+  <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-10 mb-[100px]">
+    
+    <!-- Left Heading -->
+    <h2 class="font-['Montserrat'] text-[2.5rem] sm:text-[2.75rem] md:text-[2.75rem] lg:text-[3rem] font-semibold leading-tight max-w-xl relative">
+  <span id="text"></span><span id="cursor" class="cursor"></span>
+</h2>
+
+
+    <!-- Right Paragraph -->
+    <p class="font-['Montserrat'] text-base sm:text-m md:text-[1rem] text-gray-600 leading-relaxed max-w-sm text-justify">
+      Our team has created a voting website for the King and Queen selection and organized a lantern event for Thadingyut at Gusto College.
+    </p>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-12 justify-items-stretch">
+  
+  <!-- Card 1 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Aung Min Khant.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Aung Min Khant @ Rain</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND-65 </p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+          Design & Backend Developer. (Database)
+      </span>
+    </p>
+
+  </div>
+
+  <!-- Card 2 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Aung Myint Myat.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Aung Myint Myat @ J Liu</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND-63</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Design & Frontend Developer <br>(Frontend)
+      </span>
+    </p>
+  </div>
+
+  <!-- Card 3 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Chit Snow.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Chit Snow</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND-68</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Design  <br>(Assistant)
+      </span>
+    </p>
+  </div>
+
+  <!-- Card 4 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Cho Zin Thin.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Cho Zin Thin</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 66</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Frontend  <br>(Assistant)
+      </span>
+    </p>
+  </div>
+
+  <!-- Card 1 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Hnin Pa Pa Khaing.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Hnin Pa Pa Khaing</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 61</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Design <br>(Figma)
+      </span>
+    </p>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Hnin Thiri.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Hnin Thiri</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 68</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Design <br>(Assistant)
+      </span>
+    </p>
+  </div>
+
+  <!-- Card 3 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Htet Me Me Hlaing.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Htet Me Me Hlaing</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 66</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Frontend <br>(Assistant)
+      </span>
+    </p>
+  </div>
+
+
+  <!-- Card 4 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Htet Oo Wai Yan.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Htet Oo Wai Yan</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 58</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Design & Backend Developer. <br>(Database)
+      </span>
+
+    </p>
+  </div>
+
+      <!-- Card 4 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Kaung Zaw Hein.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Kaung Zaw Hein @ Zane</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 57 </p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+        Organizer <br>(Backend)
+      </span>
+    </p>
+  </div>
+
+    <!-- Card 4 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Nyi Zin Soe.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Nyi Zin Soe @ Blax</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 61 </p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Design & Frontend Developer. <br>(Frontend)
+      </span>
+    </p>
+  </div>
+
+    <!-- Card 4 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Ma Pwint Phyu Soe.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Pwint Phyu Soe @ Moon</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 65</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Design <br>(Figma)
+      </span>
+
+    </p>
+  </div>
+
+    <!-- Card 4 -->
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] md:max-w-none h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden mx-auto">
+    
+    <!-- top block -->
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Thae Thinzar Lwin.jpg') }}"
+          alt="Team"
+          class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Thae Thinzar Lwin</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 66</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div> <!-- fixed -->
+    </div>
+
+    <!-- description stays at bottom -->
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+         Frontend Developer. <br>(Assistant)
+      </span>
+
+    </p>
+  </div>
+
+<!-- Center this card across the grid -->
+<div class="col-span-full flex justify-center">
+  <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300
+              p-6 w-full max-w-[360px] h-auto
+              flex flex-col justify-between items-center text-center overflow-hidden">
+    <div class="flex flex-col items-center">
+      <img src="{{ url_for('serve_image', filename='Ye Myat Aung.jpg') }}"
+           alt="Team"
+           class="w-28 h-28 rounded-full object-cover border-4 border-orange-400 shadow-md"/>
+      <h3 class="font-bold text-lg mt-6 text-gray-800">Ye Myat Aung</h3>
+      <p class="text-sm text-orange-500 font-medium mt-1">HND 58</p>
+      <div class="w-12 h-1 bg-orange-400 rounded-full mt-4"></div>
+    </div>
+    <p class="text-gray-600 text-sm px-4 leading-relaxed min-h-[100px]">
+      <span class="font-semibold" style="color: #015486;">
+        Frontend Developer. <br>(Assistant)
+      </span>
+    </p>
+  </div>
+</div>
+
+
+  </div>
+
+
+</div>
+    
+</div>
+</div>
+  </section>
+
+
+   <!-- Footer -->
+   <footer class="bg-[#03254C] py-4 px-4 md:py-5 md:px-8 h-auto md:h-[200px]">
+    <div class="flex flex-col md:flex-row justify-between items-center h-full text-center">
+
+        <div class="text-orange-400 font-medium 
+                    text-base lg:text-xl 
+                    mb-3 md:mb-0 
+                    ml-0 md:ml-[100px] 
+                    pr-0 md:pr-4 order-1">
+        ပျော်ရွှင်စရာသတင်းကျွတ်အချိန်အခါလေးဖြစ်ပါစေ
+        </div>
+
+        <div class="flex justify-center items-center py-2 order-2 flex-grow-0">
+        <img src="{{ url_for('serve_image', filename='SeMeeKut.png') }}" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        <img src="{{ url_for('serve_image', filename='SeMeeKut.png') }}" alt="Diya" class="w-[50px] h-[50px] -mt-3 mx-1 md:w-[70px] md:h-[70px] md:-mt-4 animate-diya-glow" />
+        <img src="{{ url_for('serve_image', filename='SeMeeKut.png') }}" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        </div>
+
+        <div class="flex flex-col items-center md:items-end 
+                    text-orange-400 font-medium 
+                    text-base md:text-lg lg:text-xl 
+                    mt-3 md:mt-0 
+                    mr-0 md:mr-[100px] 
+                    pl-0 md:pl-4 order-3">
+        
+        <div class="flex flex-wrap justify-center md:justify-end w-[370px] lg:justify-center space-x-4 md:space-x-6 mb-1 md:mb-0 font-[fa-chevron-left]">
+            <a href="{{ url_for('home') }}" class="hover:text-yellow-400">Home</a>
+            <a href="{{ url_for('candidates') }}" class="hover:text-yellow-400">Candidate</a>
+            <a href="{{ url_for('lantern') }}" class="hover:text-yellow-400">Lantern</a>
+        </div>
+
+        <br>
+
+        <div class="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-6 mt-1 md:mt-1 font-[fa-chevron-left]">
+            <a href="{{ url_for('results') }}" class="hover:text-yellow-400">Voting Result</a>
+            <a href="{{ url_for('about') }}" class="hover:text-yellow-400">About us</a>
+            <a href="{{ url_for('final') }}" class="hover:text-yellow-400">Final</a>
+            <a href="{{ url_for('winner') }}" class="hover:text-yellow-400">Winner</a>
+        </div>
+        </div>
+
+    </div>
+    </footer>
+
+
+    <!-- JS -->
+    <script>
+    // Mobile nav toggle
+    const menuBtn = document.getElementById('menu-btn');
+    const navLinks = document.getElementById('nav-links');
+    if (menuBtn) menuBtn.addEventListener('click', () => navLinks.classList.toggle('hidden'));
+    </script>
+    
+    <!-- Unified Navigation Script -->
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+
+    <script>
+    const content = "Meet the talented team \nwho make all this happen";
+const textEl = document.getElementById("text");
+const cursor = document.getElementById("cursor");
+
+// Split into spans
+content.split("").forEach(char => {
+  const span = document.createElement("span");
+  span.textContent = char === "\n" ? "\n" : char;
+  textEl.appendChild(span);
+});
+
+// Animate cursor + color change
+let index = 0;
+let forward = true;
+const spans = textEl.querySelectorAll("span");
+
+function animate() {
+  // Reset all colors first
+  spans.forEach(s => s.style.color = "black");
+
+  if (forward) {
+    for (let i = 0; i <= index; i++) {
+      spans[i].style.color = "#015486"; // blue
+    }
+    index++;
+    if (index >= spans.length) forward = false;
+  } else {
+    for (let i = 0; i < index; i++) {
+      spans[i].style.color = "#015486";
+    }
+    index--;
+    if (index <= 0) forward = true;
+  }
+
+  // Cursor position fix
+  let currentSpan;
+  if (index === 0) {
+    currentSpan = spans[0]; // start exactly on the first character
+  } else {
+    currentSpan = spans[Math.min(index, spans.length - 1)];
+  }
+
+  cursor.style.top = currentSpan.offsetTop + "px";
+  cursor.style.left = currentSpan.offsetLeft + "px"; // remove +width, now it starts exactly on character
+
+  setTimeout(animate, 100);
+}
+
+
+animate();
+    </script>
+
+</body>
+</html>

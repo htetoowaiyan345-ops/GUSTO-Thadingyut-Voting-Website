@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>GUSTO Thadingyut Voting</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" />
+  <link rel="icon" type="image/png" href="{{ url_for('serve_image', filename='favicon.png') }}" />
+
+  <style>
+    /* Pill */
+    #nav-indicator{
+      position:absolute; border-radius:.5rem; background:#015486;
+      box-shadow:0 2px 8px rgba(0,0,0,.15);
+      transition:all .2s ease-out;
+      opacity:0; pointer-events:none;
+    }
+    .nav-a{ position:relative; z-index:10; }
+    @media (min-width:768px){
+      .nav-a.is-active, .nav-a.is-active * { color:#fff !important; }
+    }
+    @media (max-width:767px){
+      .nav-a.is-active, .nav-a.is-active * { color:#111827 !important; }
+    }
+
+    /* Winner card: same-photo halo blur */
+    .winner-card { --img: url('img/king.jpg'); }
+    .winner-card .halo{
+      position:absolute; inset:0; border-radius:9999px;
+      background-image:
+        radial-gradient(circle at 50% 45%,
+          rgba(0,0,0,.18) 0 55%,
+          rgba(0,0,0,.10) 62%,
+          rgba(0,0,0,0) 75%),
+        var(--img);
+      background-size:cover; background-position:center;
+      filter: blur(14px) saturate(1.03);
+      transform: scale(1.08);
+    }
+    .winner-card .photo{
+      background-image: var(--img);
+      background-size: cover; background-position: center;
+      border-radius: 9999px;
+    }
+
+  </style>
+
+    <style>
+    .card {
+      position: relative;
+      overflow: hidden;
+      border-radius: 1rem;
+    }
+    .card video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: 0;
+    }
+    .card-content {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+
+<body class="bg-white text-center font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="flex items-center justify-between px-6 h-[72px]"> <!-- fixed height -->
+      
+      <!-- Logo -->
+      <div class="flex items-center space-x-2">
+        <a href="{{ url_for('home') }}" class="flex items-center">
+          <img src="img/Gusto_Nav_Logo.png"
+              alt="GUSTO Logo"
+              class="h-[70px] w-auto -my-4 rounded-full" /> <!-- logo bigger, negative margin -->
+        </a>
+            <div class="flex flex-col md:flex-row items-center">
+            <!-- GUSTO -->
+            <span class="font-extrabold lg:text-3xl font-[Merriweather,serif]">
+                GUSTO
+            </span>
+
+            <!-- Myanmar text -->
+            <span
+                class="ml-1 font-normal font-[Noto_Sans_Myanmar] whitespace-nowrap
+                    text-base md:text-xl max-[330px]:text-sm">
+                သီတင်းကျွတ်ပွဲတော်
+            </span>
+            </div>
+
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menu-btn" class="block md:hidden text-2xl p-2" aria-label="Open menu">&#9776;</button>
+
+      <!-- Links -->
+      <div id="nav-links"
+          class="hidden md:flex flex-col md:flex-row items-start md:items-center
+                  space-y-2 md:space-y-0 md:space-x-4 bg-white px-4 py-4 md:p-0
+                  rounded-none md:rounded-full fixed md:static top-[64px] left-0
+                  w-full md:w-auto z-40 shadow md:shadow-none">
+
+        <div class="relative md:flex md:items-center">
+          <!-- Moving pill -->
+          <span id="nav-indicator" aria-hidden="true"
+                class="hidden md:block absolute top-0 left-0 rounded-xl bg-[#015486] shadow-lg"></span>
+
+          <ul class="flex flex-col md:flex-row w-full md:w-auto space-y-2 md:space-y-0 md:space-x-2 font-medium">
+            <li><a href="{{ url_for('home') }}"           class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Home</a></li>
+            <li><a href="{{ url_for('candidates') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Candidate</a></li>
+            <li><a href="{{ url_for('lantern') }}"        class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Lantern</a></li>
+            <li><a href="{{ url_for('results') }}"  class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Voting Result</a></li>
+            <li><a href="{{ url_for('about') }}"       class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">About Us</a></li>
+            <li><a href="{{ url_for('final') }}"          class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Final</a></li>
+            <li><a href="{{ url_for('winner') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Winner</a></li>
+            <li><a href="{{ url_for('logout') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="relative flex-grow flex flex-col items-center text-center px-4 py-12 overflow-hidden">
+    <!-- Title -->
+
+    <!-- Winner Hero Section -->
+    <section class="w-full max-w-3xl mx-auto flex flex-col items-center mb-10">
+      <div class="flex flex-col items-center">
+        <img src="img/crown.png" alt="Crown" class="w-44 md:w-56 mb-2 drop-shadow-xl animate-bounce-slow" style="animation-duration:2.5s;" />
+        <h1 class="text-5xl md:text-7xl font-extrabold italic text-orange-500 drop-shadow-lg mb-2 font-[Merriweather,serif] tracking-tight">Congratulations!</h1>
+        <p class="text-2xl md:text-3xl italic text-blue-900 font-light mb-4 font-[Merriweather,serif]">A Year of 2025 - King & Queen</p>
+      </div>
+      <div class="mt-6 flex flex-col items-center">
+        <span class="block text-2xl sm:text-3xl md:text-4xl font-extrabold italic text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 via-orange-500 to-pink-500 mb-4 font-[Dancing Script,cursive] drop-shadow-lg leading-tight sm:leading-snug">
+          ✨ Our Radiant Royalty ✨<br>
+          <span class="text-base sm:text-lg md:text-xl font-normal not-italic text-orange-600 block mt-2 tracking-wide">Shining brighter than ever before</span>
+        </span>
+        <div class="flex justify-center mt-2">
+          <div class="rounded-2xl bg-white/80 shadow-2xl p-2 md:p-4 flex items-center justify-center" style="max-width:700px;">
+            <img src="img/KINGandQueen.jpg" alt="King & Queen" class="w-full h-auto rounded-xl object-contain" style="max-height:480px;" />
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- King & Queen Cards -->
+    <h2 class="mt-12 text-4xl md:text-5xl font-extrabold italic text-orange-500 mb-8 tracking-tight font-[Merriweather,serif]">👑 King & Queen 👑</h2>
+    <div class="flex flex-col md:flex-row justify-center gap-16 md:gap-24 mt-6 flex-wrap">
+      <!-- King Card -->
+      <div class="relative w-[340px] md:w-[400px] h-[520px] rounded-3xl overflow-hidden shadow-2xl flex flex-col items-center justify-center p-6 bg-white">
+        <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+          <source src="img/main_page_hero.mp4" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-black/40 z-0"></div>
+        <div class="relative z-10 flex flex-col items-center justify-center h-full w-full">
+          <img src="Kings/Bo Bo Linn.jpg" alt="King" class="w-64 h-64 object-contain rounded-2xl shadow-xl border-4 border-white mb-6 mt-2" />
+          <span class="text-3xl md:text-4xl font-extrabold italic text-yellow-300 drop-shadow mb-2 font-[Dancing Script,cursive]">👑 Bo Bo Linn 👑</span>
+          <span class="mt-2 bg-[#015486] px-6 py-2 rounded-full text-white text-lg font-semibold tracking-wide shadow">King</span>
+          <p class="mt-3 text-lg text-white/90 font-medium">HND-65</p>
+        </div>
+      </div>
+      <!-- Queen Card -->
+      <div class="relative w-[340px] md:w-[400px] h-[520px] rounded-3xl overflow-hidden shadow-2xl flex flex-col items-center justify-center p-6 bg-white">
+        <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+          <source src="img/main_page_hero.mp4" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-black/40 z-0"></div>
+        <div class="relative z-10 flex flex-col items-center justify-center h-full w-full">
+          <img src="Queen/Thanzin Cho.png" alt="Queen" class="w-64 h-64 object-contain rounded-2xl shadow-xl border-4 border-white mb-6 mt-2" />
+          <span class="text-3xl md:text-4xl font-extrabold italic text-pink-700 drop-shadow mb-2 font-[Dancing Script,cursive]">👑 Thanzin Cho 👑</span>
+          <span class="mt-2 bg-[#015486] px-6 py-2 rounded-full text-white text-lg font-semibold tracking-wide shadow">Queen</span>
+          <p class="mt-3 text-lg text-white/90 font-medium">HND-69</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lantern Winner -->
+    <h2 class="mt-16 text-3xl md:text-4xl font-extrabold italic text-yellow-500 mb-8 tracking-tight font-[Merriweather,serif]">🏮 Lantern Winner 🎉</h2>
+    <div class="flex justify-center mt-6">
+      <div class="relative w-full max-w-2xl md:w-[700px] h-auto rounded-3xl overflow-hidden shadow-2xl flex flex-col md:flex-row items-center justify-center p-2 sm:p-4 md:p-6 bg-white">
+        <video autoplay loop muted playsinline class="absolute inset-0 w-full h-full object-cover z-0">
+          <source src="img/main_page_hero.mp4" type="video/mp4">
+        </video>
+        <div class="absolute inset-0 bg-black/40 z-0"></div>
+        <div class="relative z-10 flex flex-col md:flex-row items-center justify-center h-full w-full w-full gap-0 md:gap-8">
+          <!-- Image Side -->
+          <div class="flex-shrink-0 flex justify-center items-center w-full md:w-1/2 py-4 md:py-0">
+            <img src="Lantern/hnd-6,7.jpg" alt="Lantern" class="w-[80vw] max-w-[320px] md:max-w-[340px] h-auto md:h-[340px] object-contain rounded-2xl shadow-xl border-4 border-white" style="max-height:340px;" />
+          </div>
+          <!-- Text Side -->
+          <div class="flex flex-col items-center justify-center w-full md:w-1/2 px-2 md:px-0 mt-4 md:mt-0">
+            <span class="text-lg sm:text-2xl md:text-3xl font-extrabold italic text-orange-500 drop-shadow mb-2 font-[Dancing Script,cursive] text-center">'Fairybells of Moonlight' Lantern</span>
+            <p class="mt-2 sm:mt-3 text-base sm:text-lg text-white/90 font-medium text-center">HND 6 + 7</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Inspirational Text -->
+    <div class="max-w-6xl mx-auto mt-16 mb-8 px-4">
+      <p class="text-center text-base md:text-lg text-gray-700 italic font-medium leading-relaxed">
+        ✨ At GUSTO College,<br>
+        the Thadingyut Festival reminds us that true light shines from confidence, kindness, and courage. <br>
+        Being crowned King and Queen is not just a title, but an inspiration for all to lead with honor and brighten the path for others. ✨
+      </p>
+    </div>
+  </main>
+
+
+  <!-- Footer -->
+  <footer class="bg-[#03254C] py-4 px-4 md:py-5 md:px-8 h-auto md:h-[200px]">
+    <div class="flex flex-col md:flex-row justify-between items-center h-full text-center">
+
+        <div class="text-orange-400 font-medium 
+                    text-base lg:text-xl 
+                    mb-3 md:mb-0 
+                    ml-0 md:ml-[100px] 
+                    pr-0 md:pr-4 order-1">
+        ပျော်ရွှင်စရာသတင်းကျွတ်အချိန်အခါလေးဖြစ်ပါစေ
+        </div>
+
+        <div class="flex justify-center items-center py-2 order-2 flex-grow-0">
+        <img src="{{ url_for('serve_image', filename='SeMeeKut.png') }}" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        <img src="{{ url_for('serve_image', filename='SeMeeKut.png') }}" alt="Diya" class="w-[50px] h-[50px] -mt-3 mx-1 md:w-[70px] md:h-[70px] md:-mt-4 animate-diya-glow" />
+        <img src="{{ url_for('serve_image', filename='SeMeeKut.png') }}" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        </div>
+
+        <div class="flex flex-col items-center md:items-end 
+                    text-orange-400 font-medium 
+                    text-base md:text-lg lg:text-xl 
+                    mt-3 md:mt-0 
+                    mr-0 md:mr-[100px] 
+                    pl-0 md:pl-4 order-3">
+        
+        <div class="flex flex-wrap justify-center md:justify-end w-[370px] lg:justify-center space-x-4 md:space-x-6 mb-1 md:mb-0 font-[fa-chevron-left]">
+            <a href="{{ url_for('home') }}" class="hover:text-yellow-400">Home</a>
+            <a href="{{ url_for('candidates') }}" class="hover:text-yellow-400">Candidate</a>
+            <a href="{{ url_for('lantern') }}" class="hover:text-yellow-400">Lantern</a>
+        </div>
+
+        <br>
+
+        <div class="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-6 mt-1 md:mt-1 font-[fa-chevron-left]">
+            <a href="{{ url_for('results') }}" class="hover:text-yellow-400">Voting Result</a>
+            <a href="{{ url_for('about') }}" class="hover:text-yellow-400">About us</a>
+            <a href="{{ url_for('final') }}" class="hover:text-yellow-400">Final</a>
+            <a href="{{ url_for('winner') }}" class="hover:text-yellow-400">Winner</a>
+        </div>
+        </div>
+
+    </div>
+    </footer>
+
+  <!-- Mobile nav toggle -->
+  <script>
+  const menuBtn = document.getElementById('menu-btn');
+  const navLinks = document.getElementById('nav-links');
+  if (menuBtn) menuBtn.addEventListener('click', () => navLinks.classList.toggle('hidden'));
+  </script>
+  
+  <!-- Unified Navigation Script -->
+  <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+</body>
+</html>

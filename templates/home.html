@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GUSTO Thadingyut Voting</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" type="image/png" href="img/favicon.png" />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Myanmar:wght@400;700&display=swap" rel="stylesheet">
+
+    
+    <style>
+    /* Professional Smooth Navigation Indicator */
+    #nav-indicator{
+      position:absolute; border-radius:.75rem; background:#015486;
+      box-shadow:0 4px 12px rgba(1, 84, 134, 0.3);
+      transition:all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity:0; pointer-events:none;
+      transform-origin: center;
+    }
+        /* Keep links above the pill */
+        .nav-a{ 
+            position:relative; 
+            z-index:10; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-a:hover {
+            transform: translateY(-1px);
+        }
+
+        /* ✅ Desktop-only: active link becomes white */
+        @media (min-width:768px){
+        .nav-a.is-active, .nav-a.is-active * { color:#fff !important; }
+        }
+        /* ✅ Mobile: keep active link dark on white background */
+        @media (max-width:767px){
+        .nav-a.is-active, .nav-a.is-active * { color:#111827 !important; } /* Tailwind gray-900 */
+        }
+
+        /* Smoother top/bottom fade on the card itself */
+        .card-fade{
+        -webkit-mask-image: linear-gradient(to bottom,
+            transparent 0, black 20px,
+            black calc(100% - 20px), transparent 100%);
+                mask-image: linear-gradient(to bottom,
+            transparent 0, black 20px,
+            black calc(100% - 20px), transparent 100%);
+        }
+        @media (min-width:768px){
+        .card-fade{
+            -webkit-mask-image: linear-gradient(to bottom,
+            transparent 0, black 26px,
+            black calc(100% - 26px), transparent 100%);
+                    mask-image: linear-gradient(to bottom,
+            transparent 0, black 26px,
+            black calc(100% - 26px), transparent 100%);
+        }
+        }
+
+        /* Optimized Diya glow animation */
+        @keyframes diya-glow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+        .animate-diya-glow {
+            animation: diya-glow 3s ease-in-out infinite;
+            will-change: opacity, transform;
+        }
+
+
+
+    </style>
+
+</head>
+<body class="bg-gray-50">
+    
+  <!-- Navbar -->
+  <nav class="bg-white shadow sticky top-0 z-50">
+    <div class="flex items-center justify-between px-6 h-[72px]"> <!-- fixed height -->
+      
+      <!-- Logo -->
+      <div class="flex items-center space-x-2">
+        <a href="{{ url_for('home') }}" class="flex items-center">
+          <img src="img/Gusto_Nav_Logo.png"
+              alt="GUSTO Logo"
+              class="h-[70px] w-auto -my-4 rounded-full" /> <!-- logo bigger, negative margin -->
+        </a>
+            <div class="flex flex-col md:flex-row items-center">
+            <!-- GUSTO -->
+            <span class="font-extrabold lg:text-3xl font-[Merriweather,serif]">
+                GUSTO
+            </span>
+
+            <!-- Myanmar text -->
+            <span
+                class="ml-1 font-normal font-[Noto_Sans_Myanmar] whitespace-nowrap
+                    text-base md:text-xl max-[330px]:text-sm">
+                သီတင်းကျွတ်ပွဲတော်
+            </span>
+            </div>
+
+      </div>
+
+      <!-- Hamburger -->
+      <button id="menu-btn" class="block md:hidden text-2xl p-2" aria-label="Open menu">&#9776;</button>
+
+      <!-- Links -->
+      <div id="nav-links"
+          class="hidden md:flex flex-col md:flex-row items-start md:items-center
+                  space-y-2 md:space-y-0 md:space-x-4 bg-white px-4 py-4 md:p-0
+                  rounded-none md:rounded-full fixed md:static top-[64px] left-0
+                  w-full md:w-auto z-40 shadow md:shadow-none">
+
+        <div class="relative md:flex md:items-center">
+          <!-- Moving pill -->
+          <span id="nav-indicator" aria-hidden="true"
+                class="hidden md:block absolute top-0 left-0 rounded-xl bg-[#015486] shadow-lg"></span>
+
+          <ul class="flex flex-col md:flex-row w-full md:w-auto space-y-2 md:space-y-0 md:space-x-2 font-medium">
+            <li><a href="{{ url_for('home') }}"           class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Home</a></li>
+            <li><a href="{{ url_for('candidates') }}" class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Candidate</a></li>
+            <li><a href="{{ url_for('lantern') }}"        class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Lantern</a></li>
+            <li><a href="{{ url_for('mote_phoe') }}"      class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Mote Phoe</a></li>
+            <li><a href="{{ url_for('results') }}"  class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Voting Result</a></li>
+            <li><a href="{{ url_for('about') }}"       class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">About Us</a></li>
+            <li><a href="{{ url_for('final') }}"          class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Final</a></li>
+            <li><a href="{{ url_for('winner') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Winner</a></li>
+            <li><a href="{{ url_for('logout') }}"         class="nav-a block px-3 py-2 rounded-lg text-gray-700 lg:text-2xl">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+<!-- Main Content -->
+<main class="max-w-[95%] md:max-w-[70%] mx-auto mt-4 relative">
+        <!-- User Welcome Message -->
+        {% if session.user_name %}
+        <div class="bg-gradient-to-r from-orange-400 to-orange-600 rounded-lg p-4 mb-6 text-center">
+          <h2 class="text-white text-xl font-semibold">
+            Welcome back, {{ session.user_name }}! 👋
+          </h2>
+          <p class="text-orange-100 text-sm mt-1">{{ session.user_email }}</p>
+        </div>
+        {% endif %}
+        <!-- Wrapper (relative) -->
+        <div class="relative rounded-xl overflow-hidden">
+            <!-- Video -->
+            <video autoplay muted loop playsinline
+                class="w-full h-44 sm:h-56 md:h-[400px] object-cover blur-[2px] md:blur-sm">
+            <source src="img/main_page_hero.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+            </video>
+
+            <!-- Overlay text -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+            <span
+            class="block text-lg md:text-2xl lg:text-3xl xl:text-4xl font-bold
+                    text-[#D5731E] lg:-translate-y-5"
+            style="-webkit-text-stroke: 0.5px #ffffff;"
+            >
+            တူရွှင်နွှဲပျော်
+            </span>
+            <span 
+                class="text-3xl md:text-5xl lg:text-6xl xl:text-7xl font-extrabold text-[#D5731E]" 
+                style="-webkit-text-stroke: 1px #ffffff;"
+            >
+                သီတင်းကျွတ်ပွဲတော်
+            </span>
+            </div>
+
+        </div>
+
+        <!-- Background-card that blends with the page -->
+        <div class="mx-auto max-w-4xl px-3 mt-2 mb-2">
+        <div class="card-fade overflow-hidden rounded-2xl bg-white/80 backdrop-blur-sm shadow ring-1 ring-black/5">
+            <p class="px-4 py-3 md:px-5 md:py-4 text-gray-800 leading-relaxed text-center md:text-center">
+            <span class="text-[#D5731E] font-semibold lg:text-2xl">ဝါလကင်းလွတ် သီတင်းကျွတ်</span>
+             အခါသမယမှာ လူကြီးမိဘ၊ဆရာသမားများကို ရိုသေစွာဂါရဝပြုရင်း 
+             <span class="text-[#015486] font-semibold lg:text-2xl font-[fa-chevron-left]">GUSTO</span> သီတင်းကျွတ်ပွဲတော်ကို ပျော်ရွှင်စွာဆင်နွှဲနိုင်ကြပါစေကြောင်း 
+            <span class="text-[#015486] font-semibold lg:text-2xl font-[fa-chevron-left]">GUSTO College</span>
+            မှ ဆုမွန်ကောင်း တောင်းပေးလိုက်ပါတယ်
+
+            </p>
+        </div>
+        </div>
+
+        <div class="flex flex-row gap-4 mb-4">
+            <div class="flex-1 bg-gray-100 rounded-xl shadow p-2 flex flex-col items-center transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg">
+                <a href="{{ url_for('candidates') }}" class="flex flex-col items-center w-full h-full">
+                    <img src="img/king&queen.jpg" class="w-full h-44 sm:h-56 md:h-[400px] object-cover rounded-xl mb-2 transition-opacity duration-300 hover:opacity-90">
+                    <span class="text-center text-sm font-medium lg:text-xl"><p class="lg:text-3xl font-[fa-chevron-left]">King & Queen</p> <br> ကို့စိတ်ကြိုက် အချောလေးတစ်ယောက်ကို ရွေးပြီးပြီလား? <br> (ရိုးသားဖို့တော့လိုမယ်နော်!!)</span>
+                </a>
+            </div>
+            <div class="flex-1 bg-gray-100 rounded-xl shadow p-2 flex flex-col items-center transition-all duration-300 ease-out hover:scale-[1.02] hover:shadow-lg">
+                <a href="{{ url_for('lantern') }}" class="flex flex-col items-center w-full h-full">
+                    <img src="img/meePone.jpg" class="w-full h-44 sm:h-56 md:h-[400px] object-cover rounded-xl mb-2 transition-opacity duration-300 hover:opacity-90">
+                    <span class="text-center text-sm font-medium lg:text-xl"><p class="lg:text-3xl">မီးပုံးပြိုင်ပွဲ</p><br> အကြိုက်ဆုံးမီးပုံးကို မီးထွန်းဖို့ မဲပေးပြီးပြီလား?</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="space-y-4">
+        <!-- Thadingyut Festival -->
+       <div class="relative rounded-xl h-[300px] sm:h-[300px] md:h-[500px] overflow-hidden shadow">
+            <!-- Image -->
+            <img src="img/mainpage_1st-card.jpg" alt="Thadingyut Festival"
+                class="w-full h-full object-cover blur-[5px]" />
+
+            <!-- Black overlay with 10% opacity -->
+            <div class="absolute inset-0 bg-black/30"></div>
+
+            <!-- Overlay text -->
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                <!-- Title -->
+                 <span
+                    class="block text-3xl md:text-4xl lg:text-5xl xl:text-5xl font-extrabold text-white mb-2 -translate-y-4 md:-translate-y-6 font-[fa-chevron-left]"
+                    
+                >
+                    သီတင်းကျွတ်ပွဲတော်
+                </span>
+
+                <span
+                    class="text-base md:text-lg lg:text-3xl font-semibold text-white leading-relaxed"
+                >
+                    သီတင်းကျွတ်လပြည့် (အဘိဓမ္မာအခါတော်) နေ့မှာ <br><br>
+                    စိတ်၏ ချမ်းသာခြင်း၊ ကိုယ်၏ ကျန်းမာခြင်းများနှင့် ပြည့်စုံကြပါစေ။
+                </span>
+            </div>
+
+        </div>
+
+
+        <!-- voting result -->
+        <div class="relative rounded-xl h-[300px] sm:h-[300px] md:h-[500px] overflow-hidden shadow">
+        <img src="img/mainpage_2nd-card.jpg" alt="About Us"
+            class="w-full h-full object-cover blur-[5px]" />
+        <div class="absolute inset-0 bg-black/30"></div>
+
+        <!-- Overlay content -->
+        <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+                <span
+                    class="block text-3xl md:text-4xl lg:text-5xl xl:text-5xl font-extrabold text-white mb-2 -translate-y-4 md:-translate-y-6 font-[fa-chevron-left]"
+                    
+                >
+                    Voting Result
+                </span>
+
+                <span
+                    class="text-base md:text-lg lg:text-3xl font-semibold text-white leading-relaxed"
+                >
+                    Top 5 Finalist အခုဘဲ သွားကြည့်လိုက်ရအောင်!
+                </span>
+
+            <!-- Button -->
+            <a href="{{ url_for('results') }}"
+                class="mt-6 px-6 py-2 w-[150px] h-[50px] lg:w-[200px] lg:h-[70px] text bg-white/70 text-black font-semibold rounded-full shadow hover:bg-white transition">
+            <p class="mt-[5px] lg:mt-[10px] text-[10 px] lg:text-2xl font-[fa-chevron-left]">Learn More</p>
+        </a>
+        </a>
+        </div>
+        </div>
+
+        <div class="relative rounded-xl h-[300px] sm:h-[300px] md:h-[500px] overflow-hidden shadow">
+    <img src="img/mainpage_3rd-card.jpg" alt="Final Page"
+        class="w-full h-full object-cover blur-[5px]" />
+    
+    <div class="absolute inset-0 bg-black/30"></div>
+
+    <div class="absolute inset-0 flex flex-col items-center justify-center text-center px-4">
+        <span
+            class="block text-3xl md:text-4xl lg:text-5xl xl:text-5xl font-extrabold text-white mb-2 -translate-y-4 md:-translate-y-6 font-[fa-chevron-left]"
+             
+        >
+            About Us
+        </span>
+
+        <span
+            class="text-base md:text-lg lg:text-3xl font-semibold text-white leading-relaxed"
+        >
+            Website Develop လုပ်ခဲ့တဲ့ဆရာကြီးတွေကို သွားရှိုးလိုက်ရအောင်
+        </span>
+
+        <a href="{{ url_for('about') }}"
+           class="mt-6 px-6 py-2 w-[150px] h-[50px] lg:w-[200px] lg:h-[70px] text bg-white/70 text-black font-semibold rounded-full shadow hover:bg-white transition">
+            <p class="mt-[5px] lg:mt-[10px] text-[10 px] lg:text-2xl font-[fa-chevron-left]">Learn More</p>
+        </a>
+    </div>
+</div>
+
+
+        </div>
+        <br>
+
+    </main>
+
+     <!-- Footer -->
+   <footer class="bg-[#03254C] py-4 px-4 md:py-5 md:px-8 h-auto md:h-[200px]">
+    <div class="flex flex-col md:flex-row justify-between items-center h-full text-center">
+
+        <div class="text-orange-400 font-medium 
+                    text-base lg:text-xl 
+                    mb-3 md:mb-0 
+                    ml-0 md:ml-[100px] 
+                    pr-0 md:pr-4 order-1">
+        ပျော်ရွှင်စရာသတင်းကျွတ်အချိန်အခါလေးဖြစ်ပါစေ
+        </div>
+
+        <div class="flex justify-center items-center py-2 order-2 flex-grow-0">
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[50px] h-[50px] -mt-3 mx-1 md:w-[70px] md:h-[70px] md:-mt-4 animate-diya-glow" />
+        <img src="img/SeMeeKut.png" alt="Diya" class="w-[36px] h-[36px] mx-1 md:w-[50px] md:h-[50px] animate-diya-glow" />
+        </div>
+
+        <div class="flex flex-col items-center md:items-end 
+                    text-orange-400 font-medium 
+                    text-base md:text-lg lg:text-xl 
+                    mt-3 md:mt-0 
+                    mr-0 md:mr-[100px] 
+                    pl-0 md:pl-4 order-3">
+        
+        <div class="flex flex-wrap justify-center md:justify-end w-[370px] lg:justify-center space-x-4 md:space-x-6 mb-1 md:mb-0 font-[fa-chevron-left]">
+            <a href="{{ url_for('home') }}" class="hover:text-yellow-400">Home</a>
+            <a href="{{ url_for('candidates') }}" class="hover:text-yellow-400">Candidate</a>
+            <a href="{{ url_for('lantern') }}" class="hover:text-yellow-400">Lantern</a>
+        </div>
+
+        <br>
+
+        <div class="flex flex-wrap justify-center md:justify-end space-x-4 md:space-x-6 mt-1 md:mt-1 font-[fa-chevron-left]">
+            <a href="{{ url_for('results') }}" class="hover:text-yellow-400">Voting Result</a>
+            <a href="{{ url_for('about') }}" class="hover:text-yellow-400">About us</a>
+            <a href="{{ url_for('final') }}" class="hover:text-yellow-400">Final</a>
+            <a href="{{ url_for('winner') }}" class="hover:text-yellow-400">Winner</a>
+        </div>
+        </div>
+
+    </div>
+    </footer>
+
+
+
+
+
+
+    <!-- Mobile nav toggle -->
+    <script>
+    const menuBtn = document.getElementById('menu-btn');
+    const navLinks = document.getElementById('nav-links');
+    if (menuBtn) menuBtn.addEventListener('click', () => navLinks.classList.toggle('hidden'));
+    </script>
+    
+    <!-- Unified Navigation Script -->
+    <script src="{{ url_for('static', filename='js/navigation.js') }}"></script>
+
+
+</body>
+</html>

@@ -1,0 +1,35 @@
+MySQL  mysql-3f32765c-votingwebsite.i.aivencloud.com:19840 ssl  votingdb  SQL > DESCRIBE final_tokens;
++-------------------+--------------+------+-----+---------+----------------+
+| Field             | Type         | Null | Key | Default | Extra          |
++-------------------+--------------+------+-----+---------+----------------+
+| id                | int          | NO   | PRI | NULL    | auto_increment |
+| token             | varchar(64)  | NO   | UNI | NULL    |                |
+| used_for_king     | tinyint(1)   | YES  |     | 0       |                |
+| candidate_king    | int          | YES  |     | NULL    |                |
+| used_by_king      | varchar(128) | YES  |     | NULL    |                |
+| used_at_king      | timestamp    | YES  |     | NULL    |                |
+| used_for_queen    | tinyint(1)   | YES  |     | 0       |                |
+| candidate_queen   | int          | YES  |     | NULL    |                |
+| used_by_queen     | varchar(128) | YES  |     | NULL    |                |
+| used_at_queen     | timestamp    | YES  |     | NULL    |                |
+| used_for_lantern  | tinyint(1)   | YES  |     | 0       |                |
+| candidate_lantern | int          | YES  |     | NULL    |                |
+| used_by_lantern   | varchar(128) | YES  |     | NULL    |                |
+| used_at_lantern   | timestamp    | YES  |     | NULL    |                |
+| used_for_reward   | tinyint(1)   | YES  |     | 0       |                |
+| used_by_reward    | varchar(128) | YES  |     | NULL    |                |
+| used_at_reward    | timestamp    | YES  |     | NULL    |                |
+| reward_value      | varchar(20)  | YES  |     | NULL    |                |
++-------------------+--------------+------+-----+---------+----------------+
+18 rows in set (0.0594 sec)
+ MySQL  mysql-3f32765c-votingwebsite.i.aivencloud.com:19840 ssl  votingdb  SQL > DESCRIBE final_votes;
++--------------+-----------------------------------------+------+-----+-------------------+-------------------+
+| Field        | Type                                    | Null | Key | Default           | Extra             |
++--------------+-----------------------------------------+------+-----+-------------------+-------------------+
+| id           | int                                     | NO   | PRI | NULL              | auto_increment    |
+| token        | varchar(64)                             | NO   | MUL | NULL              |                   |
+| category     | enum('king','queen','lantern','reward') | NO   |     | NULL              |                   |
+| candidate_id | int                                     | YES  |     | NULL              |                   |
+| created_at   | timestamp                               | YES  |     | CURRENT_TIMESTAMP | DEFAULT_GENERATED |
++--------------+-----------------------------------------+------+-----+-------------------+-------------------+
+5 rows in set (0.0660 sec)
